@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="You know what it is">
     <title>Only Scotts</title>
     <link rel="icon" type="image/jpeg" href="IMG/scott.jpeg">
     <style>
@@ -14,6 +15,7 @@
         
         body {
             overflow-x: hidden;
+            overflow-y: scroll;
             background-color: #000;
         }
         
@@ -36,6 +38,10 @@
     <div class="container" id="container"></div>
     
     <script>
+        let cols = 1;
+        let imageWidth = 0;
+        let imageHeight = 200;
+        
         // Calculate how many images we need to fill the viewport and beyond
         function fillContainer() {
             const container = document.getElementById('container');
@@ -46,20 +52,19 @@
             const testImg = new Image();
             testImg.src = 'IMG/scott.jpeg';
             testImg.onload = function() {
-                const imageHeight = 200;
                 const aspectRatio = testImg.naturalWidth / testImg.naturalHeight;
-                const imageWidth = imageHeight * aspectRatio;
+                imageWidth = imageHeight * aspectRatio;
                 const gap = 10;
                 
                 // Calculate how many columns can actually fit
-                const cols = Math.max(1, Math.floor((viewportWidth - 20) / (imageWidth + gap)) + 1);
+                cols = Math.max(1, Math.floor((viewportWidth - 20) / (imageWidth + gap)) + 1);
                 
                 // Set grid columns based on calculated image width
                 container.style.gridTemplateColumns = `repeat(${cols}, ${imageWidth}px)`;
                 container.style.gridAutoRows = `${imageHeight}px`;
                 
-                // Calculate rows needed (with extra for scrolling)
-                const rows = Math.ceil(viewportHeight / (imageHeight + gap)) + 10;
+                // Calculate rows needed for initial load
+                const rows = Math.ceil(viewportHeight / (imageHeight + gap)) + 5;
                 const totalImages = cols * rows;
                 
                 // Clear existing images
@@ -74,6 +79,31 @@
                 }
             };
         }
+        
+        // Add more images when scrolling near bottom
+        function addMoreImages() {
+            const container = document.getElementById('container');
+            const rowsToAdd = 5;
+            const imagesToAdd = cols * rowsToAdd;
+            
+            for (let i = 0; i < imagesToAdd; i++) {
+                const img = document.createElement('img');
+                img.src = 'IMG/scott.jpeg';
+                img.className = 'image-item';
+                container.appendChild(img);
+            }
+        }
+        
+        // Infinite scroll handler
+        window.addEventListener('scroll', function() {
+            const scrollPosition = window.scrollY + window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // When user is within 500px of the bottom, load more images
+            if (scrollPosition >= documentHeight - 500) {
+                addMoreImages();
+            }
+        });
         
         // Initial fill
         fillContainer();
