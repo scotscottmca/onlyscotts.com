@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="You know what it is">
+    <title>Only Scotts</title>
+    <link rel="icon" type="image/png" href="../IMG/BongoGinger.gif">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow-x: hidden;
+            overflow-y: scroll;
+            background-color: #000;
+        }
+        
+        .container {
+            display: grid;
+            gap: 10px;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        
+        .image-item {
+            width: auto;
+            height: 200px;
+            object-fit: contain;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container"></div>
+    
+    <script>
+        let cols = 1;
+        let imageWidth = 0;
+        let imageHeight = 200;
+        
+        // Calculate how many images we need to fill the viewport and beyond
+        function fillContainer() {
+            const container = document.getElementById('container');
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Load image to get dimensions
+            const testImg = new Image();
+            testImg.src = '../IMG/BongoGinger.gif';
+            testImg.onload = function() {
+                const aspectRatio = testImg.naturalWidth / testImg.naturalHeight;
+                imageWidth = imageHeight * aspectRatio;
+                const gap = 10;
+                
+                // Calculate how many columns can actually fit
+                cols = Math.max(1, Math.floor((viewportWidth - 20) / (imageWidth + gap)) + 1);
+                
+                // Set grid columns based on calculated image width
+                container.style.gridTemplateColumns = `repeat(${cols}, ${imageWidth}px)`;
+                container.style.gridAutoRows = `${imageHeight}px`;
+                
+                // Calculate rows needed for initial load
+                const rows = Math.ceil(viewportHeight / (imageHeight + gap)) + 5;
+                const totalImages = cols * rows;
+                
+                // Clear existing images
+                container.innerHTML = '';
+                
+                // Create image elements
+                for (let i = 0; i < totalImages; i++) {
+                    const img = document.createElement('img');
+                    img.src = '../IMG/BongoGinger.gif';
+                    img.className = 'image-item';
+                    container.appendChild(img);
+                }
+            };
+        }
+        
+        // Add more images when scrolling near bottom
+        function addMoreImages() {
+            const container = document.getElementById('container');
+            const rowsToAdd = 5;
+            const imagesToAdd = cols * rowsToAdd;
+            
+            for (let i = 0; i < imagesToAdd; i++) {
+                const img = document.createElement('img');
+                img.src = '../IMG/BongoGinger.gif';
+                img.className = 'image-item';
+                container.appendChild(img);
+            }
+        }
+        
+        // Infinite scroll handler
+        window.addEventListener('scroll', function() {
+            const scrollPosition = window.scrollY + window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // When user is within 500px of the bottom, load more images
+            if (scrollPosition >= documentHeight - 500) {
+                addMoreImages();
+            }
+        });
+        
+        // Initial fill
+        fillContainer();
+        
+        // Refill on window resize with debounce
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(fillContainer, 100);
+        });
+    </script>
+</body>
+</html>
